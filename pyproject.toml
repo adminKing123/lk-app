@@ -1,0 +1,43 @@
+[project]
+name = "lkaiv2-backend"
+version = "0.1.0"
+description = "LiveKit AI Voice Agent — Gemini LLM · ElevenLabs STT/TTS · LiveAvatar · Python"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    # Core LiveKit Agents with all required extras
+    # silero       — VAD (voice-activity detection)
+    # turn-detector — multilingual end-of-turn detection
+    # google        — Google Gemini LLM / STT / TTS plugin
+    # elevenlabs    — ElevenLabs STT & TTS plugin
+    # liveavatar    — HeyGen LiveAvatar virtual avatar plugin
+    "livekit-agents[silero,turn-detector,google,elevenlabs,liveavatar]~=1.4",
+
+    # ai-coustics background noise cancellation (separate package)
+    "livekit-plugins-ai-coustics",
+
+    # LiveKit server-side API SDK (token generation, agent dispatch)
+    "livekit-api>=0.7.0",
+
+    # FastAPI + ASGI server for the token / dispatch HTTP endpoint
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+
+    # Env-var loading
+    "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.27.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
