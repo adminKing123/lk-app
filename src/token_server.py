@@ -23,7 +23,7 @@ import json
 import logging
 from contextlib import asynccontextmanager
 from datetime import timedelta
-from typing import Literal
+from typing import Literal, Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -117,6 +117,11 @@ class TokenRequest(BaseModel):
         default="video",
         description="Call type: 'video' enables the LiveAvatar, 'voice' is audio-only.",
     )
+    language: str = Field(
+        default="en",
+        description="BCP-47 language code for the AI to respond in (e.g. 'en', 'hi', 'es').",
+        max_length=10,
+    )
 
 
 class TokenResponse(BaseModel):
@@ -155,15 +160,15 @@ def _build_access_token(room_name: str, participant_name: str) -> str:
 # Helper: dispatch the agent to the room
 # ---------------------------------------------------------------------------
 
-async def _dispatch_agent(room_name: str, call_type: str = "video", participant_name: str = "") -> None:
+async def _dispatch_agent(room_name: str, call_type: str = "video", participant_name: str = "", language: str = "en") -> None:
     """
     Ask the LiveKit server to send a job to the lkaiv2-agent worker
     for the given room.  The agent worker must already be running
     (started via `uv run src/agent.py dev`).
 
-    call_type and participant_name are forwarded as JSON metadata so the
-    agent can skip the LiveAvatar session for voice calls and personalise
-    the greeting if a name was provided.
+    call_type, participant_name, and language are forwarded as JSON metadata
+    so the agent can skip the LiveAvatar session for voice calls, personalise
+    the greeting, and respond in the user's chosen language.
     """
     lk = lk_api.LiveKitAPI(
         url=LIVEKIT_URL,
@@ -178,12 +183,13 @@ async def _dispatch_agent(room_name: str, call_type: str = "video", participant_
                 metadata=json.dumps({
                     "call_type": call_type,
                     "participant_name": participant_name,
+                    "language": language,
                 }),
             )
         )
         logger.info(
-            "Agent '%s' dispatched to room '%s' (call_type=%s, participant=%s).",
-            AGENT_NAME, room_name, call_type, participant_name or "<anonymous>",
+            "Agent '%s' dispatched to room '%s' (call_type=%s, participant=%s, language=%s).",
+            AGENT_NAME, room_name, call_type, participant_name or "<anonymous>", language,
         )
     except Exception as exc:
         # Log but don't fail the token request — agent may auto-dispatch
@@ -220,7 +226,7 @@ async def issue_token(body: TokenRequest) -> TokenResponse:
         raise HTTPException(status_code=500, detail="Failed to generate token.")
 
     # Dispatch the agent asynchronously — do not block the response
-    await _dispatch_agent(body.room_name, body.call_type, body.participant_name)
+    await _dispatch_agent(body.room_name, body.call_type, body.participant_name, body.language)
 
     return TokenResponse(
         token=token,

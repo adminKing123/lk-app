@@ -56,8 +56,8 @@ class Assistant(Agent):
     implement multi-agent handoffs, or change the RAG strategy.
     """
 
-    def __init__(self, name_context: str = "") -> None:
-        # Append participant-name context to the base instructions when available.
+    def __init__(self, name_context: str = "", language_context: str = "") -> None:
+        # Compose instructions from base persona + optional name + optional language directives.
         base = (
             "You are Max, a capable and friendly AI assistant. "
             "Your goal is to help users with any task they have — "
@@ -69,8 +69,9 @@ class Assistant(Agent):
             "Adapt your tone to the user: professional when they need it, "
             "casual and warm when the conversation calls for it."
         )
+        extra = " ".join(filter(None, [language_context, name_context]))
         super().__init__(
-            instructions=f"{base} {name_context}".strip(),
+            instructions=f"{base} {extra}".strip(),
         )
 
 
@@ -98,34 +99,49 @@ async def lkaiv2_agent(ctx: agents.JobContext):
     logger.info("New agent job received — room: %s", ctx.room.name)
 
     # ------------------------------------------------------------------
-    # 1. Determine call type and participant name from job metadata
+    # 1. Determine call type, participant name, and language from metadata
     # ------------------------------------------------------------------
     call_type = "video"        # default: full video+avatar experience
     participant_name = ""      # empty = anonymous / not provided
+    language = "en"            # default: English
 
     if ctx.job.metadata:
         try:
             meta = json.loads(ctx.job.metadata)
             call_type = meta.get("call_type", "video")
             participant_name = meta.get("participant_name", "").strip()
+            language = meta.get("language", "en").strip() or "en"
         except (json.JSONDecodeError, AttributeError):
             pass  # Malformed metadata — fall back to defaults
 
     use_avatar = call_type == "video"
     logger.info(
-        "Call type: %s | LiveAvatar: %s | Participant: %s",
-        call_type, use_avatar, participant_name or "<anonymous>",
+        "Call type: %s | LiveAvatar: %s | Participant: %s | Language: %s",
+        call_type, use_avatar, participant_name or "<anonymous>", language,
     )
 
     # ------------------------------------------------------------------
     # 2. Build the STT → LLM → TTS pipeline
     # ------------------------------------------------------------------
-    # Include the participant's name in the system instructions so the LLM
-    # can address them naturally throughout the conversation.
+    # Build name and language context strings for system instructions.
     name_context = (
         f"The user's name is {participant_name}. "
         "Address them by name naturally — not in every reply, just when it feels right."
     ) if participant_name else ""
+
+    # Map BCP-47 codes to plain language names for readability in the prompt.
+    _LANGUAGE_NAMES = {
+        "en": "English", "hi": "Hindi", "es": "Spanish", "fr": "French",
+        "de": "German", "pt": "Portuguese", "ar": "Arabic", "zh": "Chinese",
+        "ja": "Japanese", "ko": "Korean", "ru": "Russian", "it": "Italian",
+        "nl": "Dutch", "tr": "Turkish", "id": "Indonesian",
+    }
+    language_name = _LANGUAGE_NAMES.get(language, language)
+    language_context = (
+        f"IMPORTANT: Always respond exclusively in {language_name}. "
+        "Do not switch to any other language regardless of what the user says, "
+        "unless they explicitly ask you to change languages."
+    ) if language != "en" else ""
 
     session = AgentSession(
         # Speech-to-Text: ElevenLabs Scribe v2 Realtime (90+ languages)
@@ -185,7 +201,7 @@ async def lkaiv2_agent(ctx: agents.JobContext):
     # ------------------------------------------------------------------
     await session.start(
         room=ctx.room,
-        agent=Assistant(name_context=name_context),
+        agent=Assistant(name_context=name_context, language_context=language_context),
         room_options=room_io.RoomOptions(
             audio_input=room_io.AudioInputOptions(
                 # ai-coustics background-noise cancellation
@@ -199,15 +215,16 @@ async def lkaiv2_agent(ctx: agents.JobContext):
     # ------------------------------------------------------------------
     # 6. Send an opening greeting to the user
     # ------------------------------------------------------------------
+    lang_instruction = f" Greet them in {language_name}." if language != "en" else ""
     if participant_name:
         greeting_prompt = (
             f"Greet the user by their name ({participant_name}), "
-            "introduce yourself as Max, and ask how you can help them today."
+            f"introduce yourself as Max, and ask how you can help them today.{lang_instruction}"
         )
     else:
         greeting_prompt = (
-            "Greet the user warmly, introduce yourself as Max, "
-            "and ask how you can help them today."
+            f"Greet the user warmly, introduce yourself as Max, "
+            f"and ask how you can help them today.{lang_instruction}"
         )
 
     await session.generate_reply(instructions=greeting_prompt)
