@@ -9,56 +9,251 @@
 }
 
 /* ────────────────────────────────────────────
-   Left: preview tile
-──────────────────────────────────────────── */
-.preview {
-  flex: 0 0 auto;
-}
-
-.previewVideo {
-  position: relative;
-  width: 380px;
-  height: 215px;
-  border-radius: 16px;
-  background: #3c4043;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.silhouette {
-  color: rgba(255, 255, 255, 0.18);
-}
-
-.silhouette svg {
-  width: 96px;
-  height: 96px;
-}
-
-.previewLabel {
-  position: absolute;
-  bottom: 12px;
-  left: 14px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
-  background: rgba(0, 0, 0, 0.45);
-  padding: 3px 10px;
-  border-radius: 6px;
-  backdrop-filter: blur(8px);
-}
-
-/* ────────────────────────────────────────────
-   Right: join panel
+   Right: join panel (form)
 ──────────────────────────────────────────── */
 .joinPanel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 320px;
+  gap: 20px;
+  max-width: 360px;
   width: 100%;
 }
+
+.title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #e8eaed;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 0;
+  margin-top: -8px;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+}
+
+/* ── Field group: label + control ── */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* ── Name input ── */
+.nameInput {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8eaed;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s, background 0.18s;
+  box-sizing: border-box;
+}
+
+.nameInput::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.nameInput:focus {
+  border-color: rgba(26, 115, 232, 0.7);
+  background: rgba(26, 115, 232, 0.07);
+}
+
+/* ── Call type selector — card grid, clearly a selection control ── */
+.callTypeGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.callTypeCard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px 14px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, color 0.18s, transform 0.15s;
+  text-align: center;
+  font-family: inherit;
+}
+
+.callTypeCard:hover:not(.callTypeCardActive) {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.callTypeCard:active {
+  transform: scale(0.97);
+}
+
+.callTypeCardActive {
+  border-color: rgba(26, 115, 232, 0.7);
+  background: rgba(26, 115, 232, 0.12);
+  color: #8ab4f8;
+}
+
+.callTypeIcon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.callTypeTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.callTypeDesc {
+  font-size: 0.75rem;
+  opacity: 0.65;
+  line-height: 1;
+}
+
+/* ── Error ── */
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(234, 67, 53, 0.12);
+  border: 1px solid rgba(234, 67, 53, 0.25);
+  color: #f28b82;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.error svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  fill: #f28b82;
+}
+
+/* ── Join / Start conversation button — primary CTA, clearly different ── */
+.joinBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
+  border: none;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, opacity 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(26, 115, 232, 0.3);
+  margin-top: 4px;
+}
+
+.joinBtn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.joinBtn:hover:not(:disabled) {
+  background: #1967d2;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+}
+
+.joinBtn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.25);
+}
+
+.joinBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ── Spinner ── */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Hint ── */
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.hint svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+/* ── Responsive: stack vertically on small screens ── */
+@media (max-width: 680px) {
+  .page {
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .previewVideo {
+    width: 100%;
+    max-width: 380px;
+    height: 200px;
+  }
+
+  .joinPanel {
+    max-width: 100%;
+  }
+
+  .hint {
+    justify-content: center;
+  }
+}
+
 
 .title {
   margin: 0;
@@ -144,6 +339,47 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ── Call type selector ── */
+.callTypeGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.callTypeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.callTypeBtn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.callTypeBtn:hover:not(.callTypeBtnActive) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.callTypeBtnActive {
+  background: rgba(26, 115, 232, 0.18);
+  border-color: rgba(26, 115, 232, 0.6);
+  color: #8ab4f8;
 }
 
 /* ── Hint ── */

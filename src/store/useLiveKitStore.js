@@ -20,6 +20,12 @@ const useLiveKitStore = create((set, get) => ({
   roomName: null,
   connectionError: null,
 
+  /* ── Call type: 'video' uses LiveAvatar, 'voice' is audio-only ── */
+  callType: "video",  // 'video' | 'voice'
+
+  /* ── Participant display name (set by user or auto-generated) ── */
+  participantName: "",
+
   /* ── Agent ── */
   agentState: "connecting",
 
@@ -34,9 +40,11 @@ const useLiveKitStore = create((set, get) => ({
 
   /**
    * Fetch a signed token from the backend and transition to 'connected'.
-   * The backend (token_server.py) also dispatches the AI agent to the room.
+   * @param {object} opts
+   * @param {'video'|'voice'} opts.callType  - Whether to use LiveAvatar or audio-only.
+   * @param {string}          opts.participantName - User's display name (optional).
    */
-  connect: async () => {
+  connect: async ({ callType = "video", participantName = "" } = {}) => {
     if (get().connectionState === "connecting") return;
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL ?? "";
@@ -46,12 +54,13 @@ const useLiveKitStore = create((set, get) => ({
 
     try {
       const roomName = `room-${Date.now()}`;
-      const participantName = `user-${Math.random().toString(36).slice(2, 7)}`;
+      // Use provided name if given, otherwise generate an anonymous identity
+      const finalName = participantName.trim() || `user-${Math.random().toString(36).slice(2, 7)}`;
 
       const res = await fetch(tokenEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room_name: roomName, participant_name: participantName }),
+        body: JSON.stringify({ room_name: roomName, participant_name: finalName, call_type: callType }),
       });
 
       if (!res.ok) {
@@ -71,6 +80,8 @@ const useLiveKitStore = create((set, get) => ({
         token: data.token,
         roomName: data.room_name ?? roomName,
         livekitUrl,
+        callType,
+        participantName: finalName,
         connectionState: "connected",
       });
     } catch (err) {
@@ -89,6 +100,8 @@ const useLiveKitStore = create((set, get) => ({
       roomName: null,
       connectionError: null,
       agentState: "connecting",
+      callType: "video",
+      participantName: "",
       isMicOn: false,
       transcripts: [],
     }),
