@@ -1,0 +1,181 @@
+/* ── Right-side panel (Google Meet chat panel) ── */
+.panel {
+  /* Always rendered; width collapses to 0 when closed */
+  width: 340px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #2a2b2e;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+
+  /* Transition both width and opacity for a smooth slide */
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.22s ease,
+              visibility 0s linear 0s;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Collapsed state — zero-width, invisible, not focusable */
+.panel[data-open="false"] {
+  width: 0;
+  opacity: 0;
+  border-left-width: 0;
+  visibility: hidden;
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.22s ease,
+              visibility 0s linear 0.28s;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #e8eaed;
+  letter-spacing: 0.005em;
+  margin: 0;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e8eaed;
+}
+
+.closeBtn svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ── Message list ── */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* ── Empty state ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: auto;
+  color: rgba(255, 255, 255, 0.2);
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.emptyState svg {
+  width: 40px;
+  height: 40px;
+  opacity: 0.4;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Individual message row ── */
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Agent: left aligned */
+.agent {
+  flex-direction: row;
+}
+
+/* User: right aligned */
+.user {
+  flex-direction: row-reverse;
+}
+
+/* Small avatar circle */
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.agent .avatar {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.user .avatar {
+  background: #5f6368;
+  color: #e8eaed;
+}
+
+/* Message bubble */
+.bubble {
+  max-width: calc(100% - 44px);
+}
+
+.text {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 18px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #e8eaed;
+  word-break: break-word;
+}
+
+.agent .text {
+  background: rgba(26, 115, 232, 0.2);
+  border-bottom-left-radius: 4px;
+}
+
+.user .text {
+  background: rgba(255, 255, 255, 0.08);
+  border-bottom-right-radius: 4px;
+}
+
+/* Partial segment (still streaming) */
+.partial {
+  opacity: 0.55;
+  font-style: italic;
+}

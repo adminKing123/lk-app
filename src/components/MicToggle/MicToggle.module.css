@@ -1,0 +1,49 @@
+.btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  position: relative;
+  outline: none;
+}
+
+.btn:hover {
+  transform: scale(1.08);
+}
+
+.btn:active {
+  transform: scale(0.94);
+}
+
+/* Active (mic on) — dark glass */
+.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.active:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Muted — Google Meet red */
+.muted {
+  background: #ea4335;
+  color: #fff;
+}
+
+.muted:hover {
+  background: #d93025;
+}
+
+.btn svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}

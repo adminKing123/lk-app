@@ -1,0 +1,191 @@
+/* ── Page: full-screen fixed container ── */
+.page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #202124;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   Top overlay bar — scoped inside .videoArea (position: relative)
+   Never bleeds into the chat panel.
+───────────────────────────────────────────── */
+.topBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 40px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.topLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Animated state dot */
+.stateDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.dot_listening  { background: #34d399; animation: pulse 1.6s ease-in-out infinite; }
+.dot_speaking   { background: #818cf8; animation: pulse 0.7s ease-in-out infinite; }
+.dot_thinking   { background: #fbbf24; animation: pulse 0.9s ease-in-out infinite; }
+.dot_connecting { background: rgba(255, 255, 255, 0.25); }
+.dot_idle       { background: rgba(255, 255, 255, 0.25); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.4); }
+}
+
+.participantName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+.stateLabel {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+}
+
+.topRight {
+  display: flex;
+  align-items: center;
+}
+
+.timer {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* ─────────────────────────────────────────────
+   Content area — video + optional side panel
+───────────────────────────────────────────── */
+.contentArea {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.videoArea {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   Bottom toolbar — floating pill
+───────────────────────────────────────────── */
+.toolbar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(32, 33, 36, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* End call button — red pill */
+.endCallBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 22px;
+  height: 52px;
+  border-radius: 999px;
+  border: none;
+  background: #ea4335;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.endCallBtn:hover {
+  background: #d93025;
+  transform: scale(1.04);
+}
+
+.endCallBtn:active {
+  transform: scale(0.97);
+}
+
+.endCallBtn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Generic toolbar icon button (Chat) */
+.toolbarBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+  position: relative;
+}
+
+.toolbarBtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(1.06);
+}
+
+.toolbarBtn:active {
+  transform: scale(0.95);
+}
+
+.toolbarBtnActive {
+  background: rgba(138, 180, 248, 0.2);
+  color: #8ab4f8;
+}
+
+.toolbarBtnActive:hover {
+  background: rgba(138, 180, 248, 0.28);
+}
+
+.toolbarBtn svg {
+  width: 20px;
+  height: 20px;
+}
