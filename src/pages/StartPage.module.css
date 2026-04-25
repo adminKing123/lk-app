@@ -75,6 +75,51 @@
   background: rgba(26, 115, 232, 0.07);
 }
 
+/* ── Language select ── */
+.selectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.langSelect {
+  width: 100%;
+  height: 44px;
+  padding: 0 40px 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8eaed;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  box-sizing: border-box;
+}
+
+.langSelect:focus {
+  border-color: rgba(26, 115, 232, 0.7);
+  background: rgba(26, 115, 232, 0.07);
+}
+
+.langSelect option {
+  background: #2a2b2e;
+  color: #e8eaed;
+}
+
+.selectChevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
 /* ── Call type selector — card grid, clearly a selection control ── */
 .callTypeGroup {
   display: grid;

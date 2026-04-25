@@ -20,6 +20,8 @@ function StartPage() {
   const [nameInput, setNameInput] = useState("");
   /** 'video' | 'voice' — determines whether the LiveAvatar session is used */
   const [callType, setCallType]   = useState("video");
+  /** BCP-47 language code — instructs the AI to respond in this language */
+  const [language, setLanguage]   = useState("en");
 
   const isConnecting = connectionState === "connecting";
 
@@ -32,7 +34,7 @@ function StartPage() {
 
   const handleJoin = (e) => {
     e.preventDefault();
-    connect({ callType, participantName: nameInput });
+    connect({ callType, participantName: nameInput, language });
   };
 
   return (
@@ -59,6 +61,41 @@ function StartPage() {
             autoComplete="name"
             spellCheck={false}
           />
+        </div>
+
+        {/* Language selector */}
+        <div className={styles.fieldGroup}>
+          <label className={styles.fieldLabel} htmlFor="language-select">
+            Language
+          </label>
+          <div className={styles.selectWrapper}>
+            <select
+              id="language-select"
+              className={styles.langSelect}
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              <option value="en">English</option>
+              <option value="hi">Hindi — हिन्दी</option>
+              <option value="es">Spanish — Español</option>
+              <option value="fr">French — Français</option>
+              <option value="de">German — Deutsch</option>
+              <option value="pt">Portuguese — Português</option>
+              <option value="ar">Arabic — العربية</option>
+              <option value="zh">Chinese — 中文</option>
+              <option value="ja">Japanese — 日本語</option>
+              <option value="ko">Korean — 한국어</option>
+              <option value="ru">Russian — Русский</option>
+              <option value="it">Italian — Italiano</option>
+              <option value="nl">Dutch — Nederlands</option>
+              <option value="tr">Turkish — Türkçe</option>
+              <option value="id">Indonesian — Bahasa Indonesia</option>
+            </select>
+            {/* Chevron icon */}
+            <svg className={styles.selectChevron} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z" clipRule="evenodd" />
+            </svg>
+          </div>
         </div>
 
         {/* Call type selector — card-style, visually distinct from the CTA */}

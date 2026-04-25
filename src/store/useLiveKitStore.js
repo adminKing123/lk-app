@@ -26,6 +26,9 @@ const useLiveKitStore = create((set, get) => ({
   /* ── Participant display name (set by user or auto-generated) ── */
   participantName: "",
 
+  /* ── Preferred language for the AI to respond in ── */
+  language: "en",  // BCP-47 language code
+
   /* ── Agent ── */
   agentState: "connecting",
 
@@ -41,10 +44,11 @@ const useLiveKitStore = create((set, get) => ({
   /**
    * Fetch a signed token from the backend and transition to 'connected'.
    * @param {object} opts
-   * @param {'video'|'voice'} opts.callType  - Whether to use LiveAvatar or audio-only.
+   * @param {'video'|'voice'} opts.callType        - Whether to use LiveAvatar or audio-only.
    * @param {string}          opts.participantName - User's display name (optional).
+   * @param {string}          opts.language        - BCP-47 language code for AI responses.
    */
-  connect: async ({ callType = "video", participantName = "" } = {}) => {
+  connect: async ({ callType = "video", participantName = "", language = "en" } = {}) => {
     if (get().connectionState === "connecting") return;
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL ?? "";
@@ -60,7 +64,7 @@ const useLiveKitStore = create((set, get) => ({
       const res = await fetch(tokenEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room_name: roomName, participant_name: finalName, call_type: callType }),
+        body: JSON.stringify({ room_name: roomName, participant_name: finalName, call_type: callType, language }),
       });
 
       if (!res.ok) {
@@ -82,6 +86,7 @@ const useLiveKitStore = create((set, get) => ({
         livekitUrl,
         callType,
         participantName: finalName,
+        language,
         connectionState: "connected",
       });
     } catch (err) {
@@ -102,6 +107,7 @@ const useLiveKitStore = create((set, get) => ({
       agentState: "connecting",
       callType: "video",
       participantName: "",
+      language: "en",
       isMicOn: false,
       transcripts: [],
     }),
