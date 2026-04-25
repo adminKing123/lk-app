@@ -18,6 +18,7 @@ Usage:
 """
 
 import os
+import json
 import logging
 from dotenv import load_dotenv
 
@@ -55,19 +56,21 @@ class Assistant(Agent):
     implement multi-agent handoffs, or change the RAG strategy.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, name_context: str = "") -> None:
+        # Append participant-name context to the base instructions when available.
+        base = (
+            "You are Max, a capable and friendly AI assistant. "
+            "Your goal is to help users with any task they have — "
+            "answering questions, explaining concepts, brainstorming ideas, "
+            "writing, coding, research, or general conversation. "
+            "Be concise, clear, and conversational. "
+            "Speak naturally — no markdown, bullet points, asterisks, or "
+            "other formatting, because your responses will be read aloud. "
+            "Adapt your tone to the user: professional when they need it, "
+            "casual and warm when the conversation calls for it."
+        )
         super().__init__(
-            instructions=(
-                "You are Max, a capable and friendly AI assistant. "
-                "Your goal is to help users with any task they have — "
-                "answering questions, explaining concepts, brainstorming ideas, "
-                "writing, coding, research, or general conversation. "
-                "Be concise, clear, and conversational. "
-                "Speak naturally — no markdown, bullet points, asterisks, or "
-                "other formatting, because your responses will be read aloud. "
-                "Adapt your tone to the user: professional when they need it, "
-                "casual and warm when the conversation calls for it."
-            ),
+            instructions=f"{base} {name_context}".strip(),
         )
 
 
@@ -84,18 +87,46 @@ async def lkaiv2_agent(ctx: agents.JobContext):
     Entry point for each new LiveKit session.
 
     Flow:
-      1. Build AgentSession with STT → LLM → TTS pipeline.
-      2. Initialise the LiveAvatar virtual avatar.
-      3. Start the avatar (publishes video to the room).
-      4. Start the agent session (listens for user audio).
-      5. Send an opening greeting.
+      1. Determine call type (video or voice) from job metadata.
+      2. Build AgentSession with STT → LLM → TTS pipeline.
+      3. Initialise the LiveAvatar virtual avatar (video calls only).
+      4. Start the avatar — it joins the room and publishes video (video only).
+      5. Start the agent session — begins listening for user speech.
+      6. Send an opening greeting.
     """
 
     logger.info("New agent job received — room: %s", ctx.room.name)
 
     # ------------------------------------------------------------------
-    # 1. Build the STT → LLM → TTS pipeline
+    # 1. Determine call type and participant name from job metadata
     # ------------------------------------------------------------------
+    call_type = "video"        # default: full video+avatar experience
+    participant_name = ""      # empty = anonymous / not provided
+
+    if ctx.job.metadata:
+        try:
+            meta = json.loads(ctx.job.metadata)
+            call_type = meta.get("call_type", "video")
+            participant_name = meta.get("participant_name", "").strip()
+        except (json.JSONDecodeError, AttributeError):
+            pass  # Malformed metadata — fall back to defaults
+
+    use_avatar = call_type == "video"
+    logger.info(
+        "Call type: %s | LiveAvatar: %s | Participant: %s",
+        call_type, use_avatar, participant_name or "<anonymous>",
+    )
+
+    # ------------------------------------------------------------------
+    # 2. Build the STT → LLM → TTS pipeline
+    # ------------------------------------------------------------------
+    # Include the participant's name in the system instructions so the LLM
+    # can address them naturally throughout the conversation.
+    name_context = (
+        f"The user's name is {participant_name}. "
+        "Address them by name naturally — not in every reply, just when it feels right."
+    ) if participant_name else ""
+
     session = AgentSession(
         # Speech-to-Text: ElevenLabs Scribe v2 Realtime (90+ languages)
         stt=elevenlabs.STT(
@@ -124,33 +155,37 @@ async def lkaiv2_agent(ctx: agents.JobContext):
     )
 
     # ------------------------------------------------------------------
-    # 2. Initialise the LiveAvatar virtual avatar
+    # 3. Initialise the LiveAvatar virtual avatar (video calls only)
     # ------------------------------------------------------------------
     avatar_id = os.environ.get("LIVEAVATAR_AVATAR_ID", "")
-    if not avatar_id:
+    if use_avatar and avatar_id:
+        avatar = liveavatar.AvatarSession(
+            avatar_id=avatar_id,
+        )
+    elif use_avatar and not avatar_id:
         logger.warning(
             "LIVEAVATAR_AVATAR_ID is not set — the avatar session will be "
             "skipped. Set the variable in .env to enable the virtual avatar."
         )
         avatar = None
     else:
-        avatar = liveavatar.AvatarSession(
-            avatar_id=avatar_id,
-        )
+        # Voice call — intentionally skip avatar to save cost and latency
+        logger.info("Voice call mode — skipping LiveAvatar session.")
+        avatar = None
 
     # ------------------------------------------------------------------
-    # 3. Start the avatar — it joins the room and begins publishing video
+    # 4. Start the avatar — it joins the room and begins publishing video
     # ------------------------------------------------------------------
     if avatar is not None:
         await avatar.start(session, room=ctx.room)
         logger.info("LiveAvatar session started (avatar_id=%s)", avatar_id)
 
     # ------------------------------------------------------------------
-    # 4. Start the agent session — begins listening for user speech
+    # 5. Start the agent session — begins listening for user speech
     # ------------------------------------------------------------------
     await session.start(
         room=ctx.room,
-        agent=Assistant(),
+        agent=Assistant(name_context=name_context),
         room_options=room_io.RoomOptions(
             audio_input=room_io.AudioInputOptions(
                 # ai-coustics background-noise cancellation
@@ -162,14 +197,20 @@ async def lkaiv2_agent(ctx: agents.JobContext):
     )
 
     # ------------------------------------------------------------------
-    # 5. Send an opening greeting to the user
+    # 6. Send an opening greeting to the user
     # ------------------------------------------------------------------
-    await session.generate_reply(
-        instructions=(
+    if participant_name:
+        greeting_prompt = (
+            f"Greet the user by their name ({participant_name}), "
+            "introduce yourself as Max, and ask how you can help them today."
+        )
+    else:
+        greeting_prompt = (
             "Greet the user warmly, introduce yourself as Max, "
             "and ask how you can help them today."
         )
-    )
+
+    await session.generate_reply(instructions=greeting_prompt)
 
 
 # ---------------------------------------------------------------------------
