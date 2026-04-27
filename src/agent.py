@@ -24,6 +24,30 @@ from dotenv import load_dotenv
 
 from livekit import agents
 from livekit.agents import AgentServer, AgentSession, Agent, room_io, TurnHandlingOptions
+
+# ---------------------------------------------------------------------------
+# Text input handler
+# ---------------------------------------------------------------------------
+
+def handle_text(session: AgentSession, event: room_io.TextInputEvent) -> None:
+    """
+    Handles text messages sent by the user via the in-call chat input.
+
+    Called automatically by the agent runtime whenever the frontend sends a
+    message on the ``lk.chat`` topic.  Interrupts any ongoing speech first so
+    the agent can pivot cleanly to the typed question.
+
+    Args:
+        session: The active AgentSession for this room.
+        event:   The incoming text event containing the user's message.
+    """
+    message = event.text.strip()
+    if not message:
+        return
+
+    # Stop any ongoing spoken response before generating the new one
+    session.interrupt()
+    session.generate_reply(user_input=message)
 from livekit.plugins import (
     ai_coustics,
     elevenlabs,
@@ -208,6 +232,10 @@ async def lkaiv2_agent(ctx: agents.JobContext):
                 noise_cancellation=ai_coustics.audio_enhancement(
                     model=ai_coustics.EnhancerModel.QUAIL_VF_L,
                 ),
+            ),
+            # Handle text messages sent by the user via the in-call chat panel
+            text_input=room_io.TextInputOptions(
+                text_input_cb=handle_text,
             ),
         ),
     )
