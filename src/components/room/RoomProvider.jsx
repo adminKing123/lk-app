@@ -73,6 +73,28 @@ function RoomBridge() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   TextSendBridge — exposes localParticipant.sendText to the Zustand store.
+
+   Must live inside <LiveKitRoom> so useLocalParticipant() resolves.
+   Registers a stable send function in the store when the local participant is
+   available, and removes it on unmount so stale references are never called.
+───────────────────────────────────────────────────────────────────────────── */
+function TextSendBridge() {
+  const { localParticipant } = useLocalParticipant();
+  const setSendText          = useLiveKitStore((s) => s.setSendText);
+
+  useEffect(() => {
+    if (!localParticipant) return;
+
+    setSendText((text) => localParticipant.sendText(text, { topic: "lk.chat" }));
+
+    return () => setSendText(null);
+  }, [localParticipant, setSendText]);
+
+  return null;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
    MicBridge — syncs store.isMicOn → the real LiveKit microphone track.
 
    Must live inside <LiveKitRoom> so useLocalParticipant() resolves.
@@ -128,6 +150,9 @@ function RoomProvider({ children }) {
 
       {/* Syncs isMicOn store flag → real mic mute/unmute */}
       <MicBridge />
+
+      {/* Exposes localParticipant.sendText to the Zustand store for the chat input */}
+      <TextSendBridge />
 
       {children}
     </LiveKitRoom>

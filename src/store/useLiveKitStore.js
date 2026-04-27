@@ -39,6 +39,10 @@ const useLiveKitStore = create((set, get) => ({
   /** @type {{ id: string, sender: 'agent'|'user', text: string, isFinal: boolean }[]} */
   transcripts: [],
 
+  /* ── Text send function — set by TextSendBridge when inside a LiveKitRoom ── */
+  /** @type {((text: string) => Promise<void>) | null} */
+  sendText: null,
+
   /* ── Actions ── */
 
   /**
@@ -110,6 +114,7 @@ const useLiveKitStore = create((set, get) => ({
       language: "en",
       isMicOn: false,
       transcripts: [],
+      sendText: null,
     }),
 
   /** Updated by RoomBridge when the agent's lk.agent.state attribute changes. */
@@ -117,6 +122,13 @@ const useLiveKitStore = create((set, get) => ({
 
   /** Toggle the microphone on or off. MicBridge inside RoomProvider applies it. */
   setMicOn: (on) => set({ isMicOn: on }),
+
+  /**
+   * Registered by TextSendBridge (inside LiveKitRoom) to expose the LiveKit
+   * sendText API to components outside the room context.
+   * @param {((text: string) => Promise<void>) | null} fn
+   */
+  setSendText: (fn) => set({ sendText: fn }),
 
   /**
    * Upsert a transcript segment — handles LiveKit's streaming partial segments.
