@@ -7,7 +7,7 @@ makes it easy to swap personalities, add function tools, or implement
 multi-agent handoff patterns without touching the wiring code.
 """
 
-from livekit.agents import Agent
+from livekit.agents import Agent, function_tool, RunContext
 
 
 class Assistant(Agent):
@@ -26,15 +26,9 @@ class Assistant(Agent):
 
     # Base persona shared across all sessions
     _BASE_INSTRUCTIONS: str = (
-        "You are Max, a capable and friendly AI assistant. "
-        "Your goal is to help users with any task they have — "
-        "answering questions, explaining concepts, brainstorming ideas, "
-        "writing, coding, research, or general conversation. "
-        "Be concise, clear, and conversational. "
-        "Speak naturally — no markdown, bullet points, asterisks, or "
-        "other formatting, because your responses will be read aloud. "
-        "Adapt your tone to the user: professional when they need it, "
-        "casual and warm when the conversation calls for it."
+        "You are a assistant named Alex Maxwell." \
+        "Help users with whatever they need, and be friendly and engaging while doing so. " \
+        "You talk like a real human, and your responses are often warm, witty, and charming. " \
     )
 
     def __init__(
