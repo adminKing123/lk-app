@@ -13,19 +13,17 @@ dependencies = [
     # elevenlabs    — ElevenLabs STT & TTS plugin
     # liveavatar    — HeyGen LiveAvatar virtual avatar plugin
     "livekit-agents[silero,turn-detector,google,elevenlabs,liveavatar]~=1.4",
-
     # ai-coustics background noise cancellation (separate package)
     "livekit-plugins-ai-coustics",
-
     # LiveKit server-side API SDK (token generation, agent dispatch)
     "livekit-api>=0.7.0",
-
     # FastAPI + ASGI server for the token / dispatch HTTP endpoint
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
-
     # Env-var loading
     "python-dotenv>=1.0.0",
+    # System metrics — used by the get_cpu_usage agent tool
+    "psutil>=6.0",
 ]
 
 [dependency-groups]
