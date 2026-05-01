@@ -104,67 +104,71 @@ function ConversationPage() {
     <RoomProvider>
       <div className={styles.page}>
 
-        {/* ── Content area: video + optional side panel ── */}
-        <div className={`${styles.contentArea} ${showTranscript ? styles.withPanel : ""}`}>
-          {/* Video tile or voice placeholder — depends on call type */}
-          <div className={styles.videoArea}>
-            {/* Top overlay is INSIDE videoArea so it never bleeds into the chat panel */}
-            <header className={styles.topBar}>
-              <div className={styles.topLeft}>
-                <div className={`${styles.stateDot} ${styles[`dot_${agentState}`] ?? ""}`} aria-hidden="true" />
-                <span className={styles.participantName}>AI Assistant</span>
-                <span className={styles.stateLabel}>{stateLabel}</span>
-              </div>
-              <div className={styles.topRight}>
-                <span className={styles.timer}>{formatTime(elapsed)}</span>
-              </div>
-            </header>
+        {/* ── Main column: header + content + footer ── */}
+        <div className={styles.mainColumn}>
 
-            {callType === "video" ? (
-              <AvatarVideo />
-            ) : (
-              <VoicePlaceholder />
-            )}
+          {/* Header */}
+          <header className={styles.topBar}>
+            <div className={styles.topLeft}>
+              <div className={`${styles.stateDot} ${styles[`dot_${agentState}`] ?? ""}`} aria-hidden="true" />
+              <span className={styles.participantName}>AI Assistant</span>
+              <span className={styles.stateLabel}>{stateLabel}</span>
+            </div>
+            <div className={styles.topRight}>
+              <span className={styles.timer}>{formatTime(elapsed)}</span>
+            </div>
+          </header>
 
-            {/* ── Bottom toolbar — inside videoArea so centering is scoped to the video side ── */}
-            <div className={styles.toolbar}>
-              {/* Mic toggle */}
-              <MicToggle />
-
-              {/* End call — prominent red pill */}
-              <button
-                className={styles.endCallBtn}
-                onClick={handleEnd}
-                aria-label="End call"
-              >
-                {/* Phone hang-up icon */}
-                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" />
-                </svg>
-                End call
-              </button>
-
-              {/* Messages toggle */}
-              <button
-                className={`${styles.toolbarBtn} ${showTranscript ? styles.toolbarBtnActive : ""}`}
-                onClick={() => setShowTranscript((v) => !v)}
-                aria-label="Toggle messages"
-                aria-pressed={showTranscript}
-              >
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                    stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                </svg>
-              </button>
+          {/* Content: video or voice */}
+          <div className={styles.contentArea}>
+            <div className={styles.videoArea}>
+              {callType === "video" ? (
+                <AvatarVideo />
+              ) : (
+                <VoicePlaceholder />
+              )}
             </div>
           </div>
 
-          {/* Transcript side panel — always mounted, CSS drives open/close */}
-          <TranscriptPanel
-            isOpen={showTranscript}
-            onClose={() => setShowTranscript(false)}
-          />
-        </div>
+          {/* Footer toolbar */}
+          <footer className={styles.toolbar}>
+          {/* Mic toggle */}
+          <MicToggle />
+
+          {/* End call — prominent red pill */}
+          <button
+            className={styles.endCallBtn}
+            onClick={handleEnd}
+            aria-label="End call"
+          >
+            {/* Phone hang-up icon */}
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" />
+            </svg>
+            End call
+          </button>
+
+          {/* Messages toggle */}
+          <button
+            className={`${styles.toolbarBtn} ${showTranscript ? styles.toolbarBtnActive : ""}`}
+            onClick={() => setShowTranscript((v) => !v)}
+            aria-label="Toggle messages"
+            aria-pressed={showTranscript}
+          >
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+            </svg>
+          </button>
+          </footer>
+
+        </div>{/* end .mainColumn */}
+
+        {/* ── Transcript panel — full-height sibling on the right ── */}
+        <TranscriptPanel
+          isOpen={showTranscript}
+          onClose={() => setShowTranscript(false)}
+        />
 
       </div>
     </RoomProvider>
