@@ -196,7 +196,7 @@ if (typeof document !== "undefined") {
 function App() {
   return (
     <ServerGate>
-      <BrowserRouter>
+      <BrowserRouter basename="/client">
         <Routes>
           {/* Landing screen — generates token and navigates to conversation */}
           <Route path="/" element={<StartPage />} />
