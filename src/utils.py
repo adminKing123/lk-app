@@ -105,8 +105,7 @@ def build_greeting_prompt(participant_name: str, language: str) -> str:
 
     if participant_name:
         return (
-            f"Greet the user by their name ({participant_name}), "
-            f"and let them know about you!"
+            f"Greet the user, whose name is {participant_name}, in a friendly and natural way."
             f"{lang_instruction}"
         )
 
