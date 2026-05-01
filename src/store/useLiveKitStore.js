@@ -39,6 +39,16 @@ const useLiveKitStore = create((set, get) => ({
   /** @type {{ id: string, sender: 'agent'|'user', text: string, isFinal: boolean }[]} */
   transcripts: [],
 
+  /* ── Active widgets — keyed by widget type (e.g. 'cpu', 'disk') ──
+   *
+   * Using a map instead of a single slot means the agent can push multiple
+   * widget types simultaneously (CPU + Disk + ...) and each occupies its own
+   * slot.  The WidgetGrid component renders all active entries at once.
+   *
+   * Shape: { [type: string]: object }  e.g. { cpu: {...}, disk: {...} }
+   */
+  widgets: {},
+
   /* ── Text send function — set by TextSendBridge when inside a LiveKitRoom ── */
   /** @type {((text: string) => Promise<void>) | null} */
   sendText: null,
@@ -114,6 +124,7 @@ const useLiveKitStore = create((set, get) => ({
       language: "en",
       isMicOn: false,
       transcripts: [],
+      widgets: {},
       sendText: null,
     }),
 
@@ -122,6 +133,31 @@ const useLiveKitStore = create((set, get) => ({
 
   /** Toggle the microphone on or off. MicBridge inside RoomProvider applies it. */
   setMicOn: (on) => set({ isMicOn: on }),
+
+  /**
+   * Called by DataBridge when the agent publishes a widget payload via the
+   * LiveKit data channel (topic: 'widget.*').
+   * Upserts the widget into the map by its type — existing widgets of other
+   * types are preserved, so CPU and Disk (etc.) can coexist.
+   * @param {object} data - Parsed JSON payload; must contain a `type` string.
+   */
+  setWidget: (data) =>
+    set((s) => ({ widgets: { ...s.widgets, [data.type]: data } })),
+
+  /**
+   * Dismiss a single widget by type and return that slot to the normal view.
+   * Other active widgets are unaffected.
+   * @param {string} type - e.g. 'cpu' | 'disk'
+   */
+  clearWidget: (type) =>
+    set((s) => {
+      const next = { ...s.widgets };
+      delete next[type];
+      return { widgets: next };
+    }),
+
+  /** Dismiss all widgets at once (e.g. when the call ends). */
+  clearAllWidgets: () => set({ widgets: {} }),
 
   /**
    * Registered by TextSendBridge (inside LiveKitRoom) to expose the LiveKit
@@ -146,6 +182,9 @@ const useLiveKitStore = create((set, get) => ({
       }
       return { transcripts: [...s.transcripts, segment] };
     }),
+
+  activeWidgetType: null, // e.g. 'cpu' or 'disk' — used by WidgetPanel to know which tab to show
+  setActiveWidgetType: (type) => set({ activeWidgetType: type }),
 }));
 
 export default useLiveKitStore;

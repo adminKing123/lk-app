@@ -73,6 +73,43 @@ function RoomBridge() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   DataBridge — listens for agent data-channel messages and pushes parsed
+   widget payloads into the Zustand store.
+
+   The agent publishes JSON on topic-namespaced channels (e.g. 'widget.cpu').
+   Any topic matching 'widget.*' is parsed and upserted into the widgets map
+   in the store, keyed by widget type — so CPU and Disk can coexist.
+───────────────────────────────────────────────────────────────────────────── */
+function DataBridge() {
+  const room      = useRoomContext();
+  const setWidget = useLiveKitStore((s) => s.setWidget);
+  const setActiveWidgetType = useLiveKitStore((s) => s.setActiveWidgetType);
+
+  useEffect(() => {
+    const onData = (payload, _participant, _kind, topic) => {
+      // Only handle widget data-channel messages
+      if (!topic?.startsWith("widget.")) return;
+
+      try {
+        const data = JSON.parse(new TextDecoder().decode(payload));
+        // data.type is the widget key (e.g. 'cpu', 'disk') — upsert into map
+        if (data?.type) setWidget(data);
+        if (data?.type) {
+          setActiveWidgetType(data.type)
+        }; // auto-switch to new widget tab
+      } catch {
+        // Malformed payload — silently ignore
+      }
+    };
+
+    room.on(RoomEvent.DataReceived, onData);
+    return () => room.off(RoomEvent.DataReceived, onData);
+  }, [room, setWidget]);
+
+  return null;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
    TextSendBridge — exposes localParticipant.sendText to the Zustand store.
 
    Must live inside <LiveKitRoom> so useLocalParticipant() resolves.
@@ -150,6 +187,9 @@ function RoomProvider({ children }) {
 
       {/* Syncs isMicOn store flag → real mic mute/unmute */}
       <MicBridge />
+
+      {/* Listens for agent data-channel messages → upserts into widgets map in store */}
+      <DataBridge />
 
       {/* Exposes localParticipant.sendText to the Zustand store for the chat input */}
       <TextSendBridge />

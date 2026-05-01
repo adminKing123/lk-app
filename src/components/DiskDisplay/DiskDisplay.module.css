@@ -1,0 +1,281 @@
+/* ── Panel ── */
+.panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #16171b;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.025);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerIcon {
+  width: 22px;
+  height: 22px;
+  color: #60a5fa;   /* blue accent for disk */
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e8eaed;
+  letter-spacing: 0.01em;
+}
+
+.headerBadge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  border-radius: 999px;
+  padding: 2px 8px;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.2s;
+}
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e8eaed;
+  transform: rotate(90deg);
+}
+.closeBtn svg { width: 17px; height: 17px; }
+
+/* ── Body ── */
+.body {
+  flex: 1;
+  display: flex;
+  align-items: center;    /* vertically centre content — prevents empty-space stretch */
+  min-height: 0;
+  padding: 20px 32px;
+  gap: 32px;
+  /* Cap content width — bars won't stretch across ultra-wide panels */
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Left: gauge */
+.gaugeSection {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-width: 180px;
+}
+
+.gauge {
+  width: 200px;
+  height: 200px;
+}
+
+.gaugeValue {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  dominant-baseline: auto;
+  letter-spacing: -0.02em;
+}
+
+.gaugeUsed {
+  font-size: 13px;
+  font-weight: 500;
+  dominant-baseline: auto;
+}
+
+.gaugeTotal {
+  font-size: 11px;
+  font-weight: 400;
+  dominant-baseline: auto;
+}
+
+/* Free space pill */
+.freePill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(96, 165, 250, 0.08);
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  border-radius: 10px;
+  padding: 10px 24px;
+}
+
+.freePillLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 500;
+}
+
+.freePillValue {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #60a5fa;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Vertical divider */
+.divider {
+  flex-shrink: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  align-self: stretch;    /* always full height regardless of body align-items */
+  margin: 8px 0;
+}
+
+/* Right: partitions */
+.partitionsSection {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.sectionLabel {
+  margin: 0 0 8px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}
+
+/* Partition row */
+.partitionRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Label: mountpoint + fstype */
+.partitionLabel {
+  flex-shrink: 0;
+  width: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.mountpoint {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+.fstype {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.25);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+/* Bar track */
+.partTrack {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.partTick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.partFill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+/* Stats column: percent + free */
+.partStats {
+  flex-shrink: 0;
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.partPercent {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.partFree {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scale legend */
+.scaleLegend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-left: 102px;
+  padding-right: 84px;
+}
+
+.scaleLegend span {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}

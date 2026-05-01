@@ -90,13 +90,35 @@
 .contentArea {
   flex: 1;
   display: flex;
+  position: relative;   /* needed for PiP absolute positioning */
   min-height: 0;
+  overflow: hidden;
 }
 
 .videoArea {
   flex: 1;
   min-width: 0;
   overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   PiP (Picture-in-Picture) tile
+   Shown in the bottom-right corner of .contentArea when a widget is active,
+   mimicking Google Meet's minimised camera tile during screen-share.
+───────────────────────────────────────────── */
+.pip {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 220px;
+  height: 164px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 0 1.5px rgba(255, 255, 255, 0.12);
+  background: #000;
+  z-index: 10;
+  cursor: default;
+  /* opacity starts at 0; GSAP animates it in */
 }
 
 /* ─────────────────────────────────────────────
@@ -107,25 +129,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 16px 24px;
+  gap: 12px;
+  padding: 10px 24px;
   background: #17181c;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   z-index: 20;
+  position: relative;   /* anchor for .pipThumb absolute positioning */
 }
 
 /* End call button — red pill */
 .endCallBtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 22px;
-  height: 52px;
+  gap: 6px;
+  padding: 0 18px;
+  height: 44px;
   border-radius: 999px;
   border: none;
   background: #ea4335;
   color: #fff;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
@@ -142,8 +165,8 @@
 }
 
 .endCallBtn svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
@@ -154,8 +177,8 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.1);
@@ -210,6 +233,220 @@
 }
 
 .toolbarBtn svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
+
+/* ─────────────────────────────────────────────
+   Header widget tabs
+   Tabs live in the header centre zone, between the status info (left)
+   and the call timer (right). The zone grabs leftover flex space and
+   scrolls horizontally — so 2 tabs or 20 tabs look equally clean.
+───────────────────────────────────────────── */
+.headerTabs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  /* Fade edges so tabs don’t hard-clip against the left/right sections */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 20px,
+    black calc(100% - 20px),
+    transparent
+  );
+}
+.headerTabs::-webkit-scrollbar { display: none; }
+
+/* Individual header tab pill */
+.headerTab {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 4px 0 8px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+.headerTab:hover {
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Active tab — blue accent pill */
+.headerTabActive {
+  color: #8ab4f8;
+  background: rgba(138, 180, 248, 0.13);
+  border-color: rgba(138, 180, 248, 0.3);
+}
+.headerTabActive:hover {
+  background: rgba(138, 180, 248, 0.2);
+}
+
+.headerTabIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.headerTabIcon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.headerTabLabel {
+  /* slight right padding so label doesn't crowd the divider */
+  padding-right: 1px;
+}
+
+/* × close button inside each header tab */
+.headerTabClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-left: 3px;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.headerTabClose:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+.headerTabClose svg {
+  width: 8px;
+  height: 8px;
+  display: block;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+   PiP controls overlay (minimize button, visible on hover)
+───────────────────────────────────────────── */
+.pipControls {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 7px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 55%);
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.pip:hover .pipControls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pipMinimizeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  backdrop-filter: blur(6px);
+}
+.pipMinimizeBtn:hover {
+  background: rgba(0, 0, 0, 0.82);
+  transform: scale(1.1);
+}
+.pipMinimizeBtn svg { width: 13px; height: 13px; }
+
+/* PiP hidden state — fully collapsed, no pointer events */
+.pipHidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: scale(0.3);
+}
+
+/* ─────────────────────────────────────────────
+   PiP thumbnail pill — lives in the toolbar when minimized.
+   Positioned absolute-left so centred controls remain centred.
+───────────────────────────────────────────── */
+.pipThumb {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 8px 0 9px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: pipThumbIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pipThumbIn {
+  from { opacity: 0; transform: translateY(-50%) scale(0.7); }
+  to   { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+.pipThumb:hover { background: rgba(255, 255, 255, 0.12); }
+
+.pipThumbIcon {
+  display: flex;
+  align-items: center;
+  color: #8ab4f8;
+  flex-shrink: 0;
+}
+.pipThumbIcon svg { width: 14px; height: 14px; }
+
+.pipThumbLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+/* Expand / restore button inside the thumb */
+.pipRestoreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.pipRestoreBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.9);
+}
+.pipRestoreBtn svg { width: 11px; height: 11px; }
