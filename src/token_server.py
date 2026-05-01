@@ -32,6 +32,13 @@ from pydantic import BaseModel, Field
 
 from livekit import api as lk_api
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+DIST_DIR = BASE_DIR.parent / "frontend" / "dist"
+
 # ---------------------------------------------------------------------------
 # Initialisation
 # ---------------------------------------------------------------------------
@@ -233,3 +240,25 @@ async def issue_token(body: TokenRequest) -> TokenResponse:
         room_name=body.room_name,
         livekit_url=LIVEKIT_URL,
     )
+
+app.mount(
+    "/client/assets",
+    StaticFiles(directory=DIST_DIR / "assets"),
+    name="assets",
+)
+
+@app.get("/client")
+@app.get("/client/")
+async def serve_spa_root():
+    return FileResponse(DIST_DIR / "index.html")
+
+@app.get("/client/{full_path:path}")
+async def serve_spa(full_path: str):
+    file_path = DIST_DIR / full_path
+
+    # If file exists (like .js, .css), serve it
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(file_path)
+
+    # Otherwise fallback to React app
+    return FileResponse(DIST_DIR / "index.html")
